@@ -27,7 +27,7 @@ class GameCMS : CovalencePlugin
     }
 
 
-    [Command("gamecms.force"), Permission("gamecms.server.force")]
+    [Command("gamecms.force"), Permission("gamecms.force")]
     private void ForceCommand(IPlayer player, string command, string[] args)
     {
         try
