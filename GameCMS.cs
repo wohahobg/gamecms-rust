@@ -103,7 +103,7 @@ class GameCMS : CovalencePlugin
         foreach (var commandData in commands)
         {
 #if CARBON
-            var player = BasePlayer.Find(commandData.SteamId.);
+            var player = BasePlayer.Find(commandData.SteamId.ToString());
 #else
             var player = players.FindPlayerById(commandData.SteamId.ToString());
 #endif
