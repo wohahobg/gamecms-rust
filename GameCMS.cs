@@ -33,7 +33,8 @@ class GameCMS : CovalencePlugin
         try
         {
             player.Reply(messagePrefix + "Forcing command execution...");
-            FetchCommands(res => {
+            FetchCommands(res =>
+            {
                 DispatchCommands(res.Data);
             }, code => Log("Unable to fetch data from GameCMS.ORG API (code {0})", code));
         }
@@ -70,7 +71,8 @@ class GameCMS : CovalencePlugin
 
         lastSent = now;
 
-        FetchCommands(res => {
+        FetchCommands(res =>
+        {
             DispatchCommands(res.Data);
         }, code => LogError("Unable to fetch data from GameCMS.ORG API (code {0})", code));
     }
@@ -89,11 +91,15 @@ class GameCMS : CovalencePlugin
             callback(JsonConvert.DeserializeObject<GameCMSApiResponse>(response));
         }, this, RequestMethod.GET, GetRequestHeaders());
 #else
-            webrequest.Enqueue(url, null, (code, response) => {
-              callback(JsonConvert.DeserializeObject < GameCMSApiResponse > (response));
-            }, this, RequestMethod.GET, GetRequestHeaders(), 0f, onException: (responseCode, responseObject, responseException) => {
-              errorHandler(responseCode);
-            });
+        webrequest.Enqueue(url, null, (code, response) => {
+        if (string.IsNullOrEmpty(response)) {
+            errorHandler(code);
+        } else {
+            callback(JsonConvert.DeserializeObject<GameCMSApiResponse>(response));
+        }
+        }, this, RequestMethod.GET, GetRequestHeaders(), 0f, onException: (responseCode, responseObject, responseException) => {
+            errorHandler(responseCode);
+        });
 #endif
     }
 
