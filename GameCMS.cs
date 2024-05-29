@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Oxide.Plugins;
 
-[Info("GameCMS", "GameCMS.ORG", "0.1.1")]
+[Info("GameCMS", "GameCMS.ORG", "0.1.2")]
 [Description("Link your game server with the GameCMS.ORG API.")]
 class GameCMS : CovalencePlugin
 {
@@ -80,7 +80,6 @@ class GameCMS : CovalencePlugin
     private void FetchCommands(Action<GameCMSApiResponse> callback, Action<int> errorHandler)
     {
         var url = "https://api.gamecms.org/v2/commands/queue/rust";
-#if !CARBON
         webrequest.Enqueue(url, null, (code, response) =>
         {
             if (code != 200)
@@ -90,17 +89,6 @@ class GameCMS : CovalencePlugin
             }
             callback(JsonConvert.DeserializeObject<GameCMSApiResponse>(response));
         }, this, RequestMethod.GET, GetRequestHeaders());
-#else
-        webrequest.Enqueue(url, null, (code, response) => {
-        if (string.IsNullOrEmpty(response)) {
-            errorHandler(code);
-        } else {
-            callback(JsonConvert.DeserializeObject<GameCMSApiResponse>(response));
-        }
-        }, this, RequestMethod.GET, GetRequestHeaders(), 0f, onException: (responseCode, responseObject, responseException) => {
-            errorHandler(responseCode);
-        });
-#endif
     }
 
     private void DispatchCommands(List<CommandData> commands)
@@ -108,11 +96,7 @@ class GameCMS : CovalencePlugin
         List<int> executedCommandIds = new List<int>();
         foreach (var commandData in commands)
         {
-#if CARBON
-            var player = BasePlayer.Find(commandData.SteamId.ToString());
-#else
             var player = players.FindPlayerById(commandData.SteamId.ToString());
-#endif
 
             if (player == null) continue;
             if (commandData.MustBeOnline && !player.IsConnected) continue;
@@ -136,7 +120,7 @@ class GameCMS : CovalencePlugin
         var requestBody = $"ids={Uri.EscapeDataString(JsonConvert.SerializeObject(commandIds))}";
         webrequest.Enqueue(url, requestBody, (code, response) =>
         {
-
+            
         }, this, RequestMethod.POST, GetFormRequestHeaders());
     }
 
